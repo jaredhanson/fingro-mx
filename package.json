@@ -1,7 +1,7 @@
 {
   "name": "fingro-mx",
   "version": "0.0.0",
-  "description": "TODO: No description specified",
+  "description": "MX record-based entity information discovery.",
   "keywords": [
     "findidp"
   ],
