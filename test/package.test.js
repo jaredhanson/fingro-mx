@@ -1,11 +1,13 @@
 /* global describe, it, expect */
 
-var mx = require('..');
+var factory = require('..');
+var expect = require('chai').expect;
+
 
 describe('fingro-mx', function() {
   
   it('should export function', function() {
-    expect(mx).to.be.a('function');
+    expect(factory).to.be.an('function');
   });
   
 });
