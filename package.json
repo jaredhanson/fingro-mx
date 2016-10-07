@@ -17,18 +17,21 @@
   "bugs": {
     "url": "http://github.com/jaredhanson/fingro-mx/issues"
   },
+  "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://www.opensource.org/licenses/MIT"
+      "url": "http://opensource.org/licenses/MIT"
     }
   ],
   "main": "./lib",
   "dependencies": {
+    
   },
   "devDependencies": {
-    "chai": "^2.3.0",
-    "mocha": "^2.2.5"
+    "make-node": "^0.3.0",
+    "mocha": "^2.0.0",
+    "chai": "^3.0.0"
   },
   "engines": {
     "node": "*"
