@@ -169,45 +169,6 @@ describe('fingro-mx', function() {
       });
     });
     
-    describe('resolving to custom exchange to service map, where an unknown higher priority exchange has been added', function() {
-      var resolve = sinon.stub().yields(null, [
-        { exchange: 'mail.example.com', priority: 10 },
-        { exchange: 'smtp.example.com', priority: 1 }
-      ]);
-      
-      
-      var services;
-      before(function(done) {
-        var exchanges = {
-          'mail.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
-        }
-        
-        
-        var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
-        
-        resolver.resolveServices('acct:alice@example.com', function(err, s) {
-          if (err) { return done(err); }
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'example.com', 'MX'
-        );
-      });
-      
-      it('should yeild services', function() {
-        expect(services).to.be.an('object');
-        expect(Object.keys(services)).to.have.length(1);
-        expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
-          { location: 'https://id.example.com' }
-        ]);
-      });
-    });
-    
     describe('resolving to custom exchange to service map, using array of strings', function() {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'mail.example.com', priority: 1 }
@@ -243,6 +204,45 @@ describe('fingro-mx', function() {
         expect(services['oauth2-authorize']).to.deep.equal([
           { location: 'https://www.example.com/oauth2/08/authorize' },
           { location: 'https://www.example.com/oauth2/00/authorize' }
+        ]);
+      });
+    });
+    
+    describe('resolving to custom exchange to service map, where an unknown higher priority exchange has been added', function() {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'mail.example.com', priority: 10 },
+        { exchange: 'smtp.example.com', priority: 1 }
+      ]);
+      
+      
+      var services;
+      before(function(done) {
+        var exchanges = {
+          'mail.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
+        }
+        
+        
+        var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
+        
+        resolver.resolveServices('acct:alice@example.com', function(err, s) {
+          if (err) { return done(err); }
+          services = s;
+          done();
+        })
+      });
+      
+      it('should call dns.resolve', function() {
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'example.com', 'MX'
+        );
+      });
+      
+      it('should yeild services', function() {
+        expect(services).to.be.an('object');
+        expect(Object.keys(services)).to.have.length(1);
+        expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
+          { location: 'https://id.example.com' }
         ]);
       });
     });
