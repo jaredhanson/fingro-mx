@@ -297,7 +297,7 @@ describe('fingro-mx', function() {
       it('should yield error', function() {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal('Unknown exchange: unknown.com');
-        expect(error.code).to.equal('ENOTFOUND');
+        expect(error.code).to.equal('EPROTONOSUPPORT');
       });
       
       it('should not yeild services', function() {
