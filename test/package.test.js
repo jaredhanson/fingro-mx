@@ -270,6 +270,41 @@ describe('fingro-mx', function() {
       });
     });
     
+    describe('error due to unknown exchnage', function() {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'mail.unknown.com', priority: 1 },
+      ]);
+      
+      
+      var services, error;
+      before(function(done) {
+        var resolver = $require('..', { dns: { resolve: resolve } })();
+        
+        resolver.resolveServices('acct:john@unknown.com', function(err, s) {
+          error = err;
+          services = s;
+          done();
+        })
+      });
+      
+      it('should call dns.resolve', function() {
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'unknown.com', 'MX'
+        );
+      });
+      
+      it('should yield error', function() {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal('Unknown exchange: unknown.com');
+        expect(error.code).to.equal('ENOTFOUND');
+      });
+      
+      it('should not yeild services', function() {
+        expect(services).to.be.undefined;
+      });
+    });
+    
     describe('error due to no MX records', function() {
       var ierr = new Error('queryMx ENODATA example.com');
       ierr.code = 'ENODATA';
