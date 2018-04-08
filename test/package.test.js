@@ -262,7 +262,7 @@ describe('fingro-mx', function() {
       it('should yield error', function() {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal('Scheme not supported: http:');
-        expect(error.code).to.equal('ENOSUPPORT');
+        expect(error.code).to.equal('EIDNOSUPPORT');
       });
       
       it('should not yeild services', function() {
