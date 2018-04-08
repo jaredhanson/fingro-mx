@@ -208,6 +208,29 @@ describe('fingro-mx', function() {
       });
     });
     
+    describe('error due to unsupported identifier', function() {
+      var error, services;
+      before(function(done) {
+        var resolver = factory();
+        
+        resolver.resolveServices('http://example.com/~joe', function(err, s) {
+          error = err;
+          services = s;
+          done();
+        })
+      });
+      
+      it('should yield error', function() {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal('Scheme not supported: http:');
+        expect(error.code).to.equal('ENOSUPPORT');
+      });
+      
+      it('should not yeild services', function() {
+        expect(services).to.be.undefined;
+      });
+    });
+    
     describe('error due to no MX records', function() {
       var ierr = new Error('queryMx ENODATA example.com');
       ierr.code = 'ENODATA';
