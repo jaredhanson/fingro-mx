@@ -102,12 +102,12 @@ describe('fingro-mx', function() {
       ]);
       
       
-      var services;
+      var services, error;
       before(function(done) {
         var resolver = $require('..', { dns: { resolve: resolve } })();
         
         resolver.resolveServices('acct:jared@auth0.com', 'foo-bar', function(err, s) {
-          if (err) { return done(err); }
+          error = err;
           services = s;
           done();
         })
@@ -120,7 +120,13 @@ describe('fingro-mx', function() {
         );
       });
       
-      it('should yeild services', function() {
+      it('should yield error', function() {
+        expect(error).to.be.an.instanceOf(Error);
+        expect(error.message).to.equal('Service not found: foo-bar');
+        expect(error.code).to.equal('ENODATA');
+      });
+      
+      it('should not yeild services', function() {
         expect(services).to.be.undefined;
       });
     });
@@ -155,6 +161,7 @@ describe('fingro-mx', function() {
       it('should yield error', function() {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal('queryMx ENODATA example.com');
+        expect(error.code).to.equal('ENODATA');
       });
       
       it('should not yeild services', function() {
@@ -192,6 +199,7 @@ describe('fingro-mx', function() {
       it('should yield error', function() {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
+        expect(error.code).to.equal('ENOTFOUND');
       });
       
       it('should not yeild services', function() {
