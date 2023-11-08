@@ -128,41 +128,29 @@ describe('fingro-mx', function() {
       });
     }); // should yield error when service is not available
     
-    describe('resolving to custom exchange to service map, using string', function() {
+    it('resolving to custom exchange to service map, using string', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'mail.example.com', priority: 1 }
       ]);
       
       
-      var services;
-      before(function(done) {
-        var exchanges = {
-          'mail.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
-        }
+      var exchanges = {
+        'mail.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
+      }
+      var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
+      resolver.resolveServices('acct:alice@example.com', function(err, services) {
+        if (err) { return done(err); }
         
-        
-        var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
-        
-        resolver.resolveServices('acct:alice@example.com', function(err, s) {
-          if (err) { return done(err); }
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
         expect(resolve).to.have.been.calledOnce;
         expect(resolve).to.have.been.calledWith(
           'example.com', 'MX'
         );
-      });
-      
-      it('should yeild services', function() {
         expect(services).to.be.an('object');
         expect(Object.keys(services)).to.have.length(1);
         expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
           { location: 'https://id.example.com' }
         ]);
+        done();
       });
     });
     
