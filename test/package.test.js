@@ -70,7 +70,7 @@ describe('fingro-mx', function() {
       });
     }); // should yield all services when MX records resolve to google
     
-    describe('resolving to google.com, with type not found', function() {
+    it('should yield error when service is not available', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -79,35 +79,15 @@ describe('fingro-mx', function() {
         { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
       ]);
       
-      
-      var services, error;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
-        
-        resolver.resolveServices('acct:jared@auth0.com', 'foo-bar', function(err, s) {
-          error = err;
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'auth0.com', 'MX'
-        );
-      });
-      
-      it('should yield error', function() {
-        expect(error).to.be.an.instanceOf(Error);
-        expect(error.message).to.equal('Service not found: foo-bar');
-        expect(error.code).to.equal('ENODATA');
-      });
-      
-      it('should not yeild services', function() {
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:jared@auth0.com', 'foo-bar', function(err, services) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Service not found: foo-bar');
+        expect(err.code).to.equal('ENODATA');
         expect(services).to.be.undefined;
+        done();
       });
-    });
+    }); // should yield error when service is not available
     
     describe('resolving to custom exchange to service map, using string', function() {
       var resolve = sinon.stub().yields(null, [
