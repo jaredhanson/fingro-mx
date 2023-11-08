@@ -12,6 +12,45 @@ describe('fingro-mx', function() {
     expect(factory).to.be.an('function');
   });
   
+  describe('resolve', function() {
+    
+    it('should yield record when called without type argument', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'aspmx.l.google.com', priority: 1 },
+        { exchange: 'aspmx2.googlemail.com', priority: 10 },
+        { exchange: 'aspmx3.googlemail.com', priority: 10 },
+        { exchange: 'alt1.aspmx.l.google.com', priority: 5 },
+        { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
+      ]);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolve('acct:jared@auth0.com', function(err, record) {
+        if (err) { return done(err); }
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'auth0.com', 'MX'
+        );
+        expect(record).to.be.an('object');
+        expect(record).to.deep.equal({
+          services: {
+            'oauth2-authorize': [
+              { location: 'https://accounts.google.com/o/oauth2/v2/auth' }
+            ],
+            'oauth2-token': [
+              { location: 'https://www.googleapis.com/oauth2/v4/token' }
+            ],
+            'http://openid.net/specs/connect/1.0/issuer': [
+              { location: 'https://accounts.google.com' }
+            ]
+          }
+        });
+        done();
+      });
+    });
+    
+  }); // resolve
+  
   describe('resolveServices', function() {
     
     it('should yield service when MX records resolve to google', function(done) {
@@ -339,6 +378,6 @@ describe('fingro-mx', function() {
       });
     });
     
-  });
+  }); // resolveServices
   
 });
