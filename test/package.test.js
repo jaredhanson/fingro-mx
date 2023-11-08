@@ -286,7 +286,7 @@ describe('fingro-mx', function() {
       });
     }); // should yield error when domain name not found
     
-    it('should yield error when MX records not found', function(done) {
+    it('should yield error when MX record not found', function(done) {
       var ierr = new Error('queryMx ENODATA example.com');
       ierr.code = 'ENODATA';
       ierr.errno = 'ENODATA';
@@ -306,7 +306,7 @@ describe('fingro-mx', function() {
         expect(services).to.be.undefined;
         done();
       });
-    }); // should yield error when MX records not found
+    }); // should yield error when MX record not found
     
   }); // resolveServices
   
