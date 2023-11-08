@@ -264,45 +264,7 @@ describe('fingro-mx', function() {
       });
     });
     
-    describe('error due to no MX records', function() {
-      var ierr = new Error('queryMx ENODATA example.com');
-      ierr.code = 'ENODATA';
-      ierr.errno = 'ENODATA';
-      ierr.syscall = 'queryMx';
-      ierr.hostname = 'example.com';
-      var resolve = sinon.stub().yields(ierr);
-      
-      
-      var error, services;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
-        
-        resolver.resolveServices('acct:joe@example.com', function(err, s) {
-          error = err;
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'example.com', 'MX'
-        );
-      });
-      
-      it('should yield error', function() {
-        expect(error).to.be.an.instanceOf(Error);
-        expect(error.message).to.equal('queryMx ENODATA example.com');
-        expect(error.code).to.equal('ENODATA');
-      });
-      
-      it('should not yeild services', function() {
-        expect(services).to.be.undefined;
-      });
-    });
-    
-    it('should yield error when domain not found', function(done) {
+    it('should yield error when domain name not found', function(done) {
       var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
       ierr.code = 'ENOTFOUND';
       ierr.errno = 'ENOTFOUND';
@@ -322,7 +284,29 @@ describe('fingro-mx', function() {
         expect(services).to.be.undefined;
         done();
       });
-    });
+    }); // should yield error when domain name not found
+    
+    it('should yield error when MX records not found', function(done) {
+      var ierr = new Error('queryMx ENODATA example.com');
+      ierr.code = 'ENODATA';
+      ierr.errno = 'ENODATA';
+      ierr.syscall = 'queryMx';
+      ierr.hostname = 'example.com';
+      var resolve = sinon.stub().yields(ierr);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:joe@example.com', function(err, services) {
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'example.com', 'MX'
+        );
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('queryMx ENODATA example.com');
+        expect(err.code).to.equal('ENODATA');
+        expect(services).to.be.undefined;
+        done();
+      });
+    }); // should yield error when MX records not found
     
   }); // resolveServices
   
