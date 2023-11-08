@@ -206,29 +206,6 @@ describe('fingro-mx', function() {
       });
     }); // should yield error when service is not available
     
-    describe('error due to unsupported identifier', function() {
-      var error, services;
-      before(function(done) {
-        var resolver = factory();
-        
-        resolver.resolveServices('http://example.com/~joe', function(err, s) {
-          error = err;
-          services = s;
-          done();
-        })
-      });
-      
-      it('should yield error', function() {
-        expect(error).to.be.an.instanceOf(Error);
-        expect(error.message).to.equal('Scheme not supported: http:');
-        expect(error.code).to.equal('EIDNOSUPPORT');
-      });
-      
-      it('should not yeild services', function() {
-        expect(services).to.be.undefined;
-      });
-    });
-    
     it('should yield error when domain name not found', function(done) {
       var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
       ierr.code = 'ENOTFOUND';
@@ -291,6 +268,17 @@ describe('fingro-mx', function() {
         done();
       });
     }); // should yield error when exchange is unknown
+    
+    it('should yield error when querying for unsupported identifier', function(done) {
+      var resolver = factory();
+      resolver.resolveServices('http://example.com/~joe', function(err, services) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('URI scheme not supported: http:');
+        expect(err.code).to.equal('BADNAME');
+        expect(services).to.be.undefined;
+        done();
+      });
+    }); // should yield error when querying for unsupported identifier
     
   }); // resolveServices
   
