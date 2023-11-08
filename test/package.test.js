@@ -302,7 +302,7 @@ describe('fingro-mx', function() {
       });
     });
     
-    describe('error due to no domain not found', function() {
+    it('should yield error when domain not found', function(done) {
       var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
       ierr.code = 'ENOTFOUND';
       ierr.errno = 'ENOTFOUND';
@@ -310,33 +310,17 @@ describe('fingro-mx', function() {
       ierr.hostname = 'asdfasdfasdfasdf33433.com';
       var resolve = sinon.stub().yields(ierr);
       
-      
-      var error, services;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
-        
-        resolver.resolveServices('acct:foo@asdfasdfasdfasdf33433.com', function(err, s) {
-          error = err;
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:foo@asdfasdfasdfasdf33433.com', function(err, services) {
         expect(resolve).to.have.been.calledOnce;
         expect(resolve).to.have.been.calledWith(
           'asdfasdfasdfasdf33433.com', 'MX'
         );
-      });
-      
-      it('should yield error', function() {
-        expect(error).to.be.an.instanceOf(Error);
-        expect(error.message).to.equal('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
-        expect(error.code).to.equal('ENOTFOUND');
-      });
-      
-      it('should not yeild services', function() {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
+        expect(err.code).to.equal('ENOTFOUND');
         expect(services).to.be.undefined;
+        done();
       });
     });
     
