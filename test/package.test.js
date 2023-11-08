@@ -14,7 +14,7 @@ describe('fingro-mx', function() {
   
   describe('resolveServices', function() {
     
-    describe('resolving to google.com', function() {
+    it('resolving to google.com', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -23,26 +23,14 @@ describe('fingro-mx', function() {
         { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
       ]);
       
-      
-      var services;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:jared@auth0.com', function(err, services) {
+        if (err) { return done(err); }
         
-        resolver.resolveServices('acct:jared@auth0.com', function(err, s) {
-          if (err) { return done(err); }
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
         expect(resolve).to.have.been.calledOnce;
         expect(resolve).to.have.been.calledWith(
           'auth0.com', 'MX'
         );
-      });
-      
-      it('should yeild services', function() {
         expect(services).to.be.an('object');
         expect(Object.keys(services)).to.have.length(3);
         expect(services['oauth2-authorize']).to.deep.equal([
@@ -54,6 +42,7 @@ describe('fingro-mx', function() {
         expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
           { location: 'https://accounts.google.com' }
         ]);
+        done();
       });
     });
     
