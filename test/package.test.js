@@ -14,7 +14,31 @@ describe('fingro-mx', function() {
   
   describe('resolveServices', function() {
     
-    it('resolving to google.com', function(done) {
+    it('should yield service when MX records resolve to google', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'aspmx.l.google.com', priority: 1 },
+        { exchange: 'aspmx2.googlemail.com', priority: 10 },
+        { exchange: 'aspmx3.googlemail.com', priority: 10 },
+        { exchange: 'alt1.aspmx.l.google.com', priority: 5 },
+        { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
+      ]);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:jared@auth0.com', 'oauth2-authorize', function(err, services) {
+        if (err) { return done(err); }
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'auth0.com', 'MX'
+        );
+        expect(services).to.be.an('array');
+        expect(services).to.have.length(1);
+        expect(services[0]).to.deep.equal({ location: 'https://accounts.google.com/o/oauth2/v2/auth' });
+        done();
+      });
+    }); // should yield service when MX records resolve to google
+    
+    it('should yield all services when MX records resolve to google', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -44,42 +68,7 @@ describe('fingro-mx', function() {
         ]);
         done();
       });
-    });
-    
-    describe('resolving to google.com, with type', function() {
-      var resolve = sinon.stub().yields(null, [
-        { exchange: 'aspmx.l.google.com', priority: 1 },
-        { exchange: 'aspmx2.googlemail.com', priority: 10 },
-        { exchange: 'aspmx3.googlemail.com', priority: 10 },
-        { exchange: 'alt1.aspmx.l.google.com', priority: 5 },
-        { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
-      ]);
-      
-      
-      var services;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
-        
-        resolver.resolveServices('acct:jared@auth0.com', 'oauth2-authorize', function(err, s) {
-          if (err) { return done(err); }
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'auth0.com', 'MX'
-        );
-      });
-      
-      it('should yeild services', function() {
-        expect(services).to.be.an('array');
-        expect(Object.keys(services)).to.have.length(1);
-        expect(services[0]).to.deep.equal({ location: 'https://accounts.google.com/o/oauth2/v2/auth' });
-      });
-    });
+    }); // should yield all services when MX records resolve to google
     
     describe('resolving to google.com, with type not found', function() {
       var resolve = sinon.stub().yields(null, [
