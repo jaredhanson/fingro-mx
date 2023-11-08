@@ -229,41 +229,6 @@ describe('fingro-mx', function() {
       });
     });
     
-    describe('error due to unknown exchnage', function() {
-      var resolve = sinon.stub().yields(null, [
-        { exchange: 'mail.unknown.com', priority: 1 },
-      ]);
-      
-      
-      var services, error;
-      before(function(done) {
-        var resolver = $require('..', { dns: { resolve: resolve } })();
-        
-        resolver.resolveServices('acct:john@unknown.com', function(err, s) {
-          error = err;
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'unknown.com', 'MX'
-        );
-      });
-      
-      it('should yield error', function() {
-        expect(error).to.be.an.instanceOf(Error);
-        expect(error.message).to.equal('Unknown exchange: unknown.com');
-        expect(error.code).to.equal('EPROTONOSUPPORT');
-      });
-      
-      it('should not yeild services', function() {
-        expect(services).to.be.undefined;
-      });
-    });
-    
     it('should yield error when domain name not found', function(done) {
       var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
       ierr.code = 'ENOTFOUND';
@@ -307,6 +272,25 @@ describe('fingro-mx', function() {
         done();
       });
     }); // should yield error when MX record not found
+    
+    it('should yield error when exchange is unknown', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'smtp.unknown.com', priority: 1 },
+      ]);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:john@unknown.com', function(err, services) {
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'unknown.com', 'MX'
+        );
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Unknown exchange: unknown.com');
+        expect(err.code).to.equal('EPROTONOSUPPORT');
+        expect(services).to.be.undefined;
+        done();
+      });
+    }); // should yield error when exchange is unknown
     
   }); // resolveServices
   
