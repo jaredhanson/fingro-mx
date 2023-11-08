@@ -109,7 +109,7 @@ describe('fingro-mx', function() {
       });
     }); // should yield all services when MX records resolve to google by default
     
-    it('should yield all services when MX records resolve to configured exchange', function(done) {
+    it('should yield all services when MX records resolve to configured exchange with single location per service', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'smtp.example.com', priority: 1 }
       ]);
@@ -132,7 +132,35 @@ describe('fingro-mx', function() {
         ]);
         done();
       });
-    }); // should yield all services when MX records resolve to configured exchange
+    }); // should yield all services when MX records resolve to configured exchange with single location per service
+    
+    it('should yield all services when MX records resolve to configured exchange with multiple locations per service', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'smtp.example.com', priority: 1 }
+      ]);
+      
+      var exchanges = {
+        'smtp.example.com': { 'oauth2-authorize': [ 'https://www.example.com/alt1/oauth2/authorize', 'https://www.example.com/alt2/oauth2/authorize' ] }
+      };
+      var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
+      resolver.resolveServices('acct:alice@example.com', function(err, s) {
+        if (err) { return done(err); }
+        services = s;
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'example.com', 'MX'
+        );
+        expect(services).to.be.an('object');
+        expect(Object.keys(services)).to.have.length(1);
+        expect(services['oauth2-authorize']).to.deep.equal([
+          { location: 'https://www.example.com/alt1/oauth2/authorize' },
+          { location: 'https://www.example.com/alt2/oauth2/authorize' }
+        ]);
+        done();
+      });
+    }); // should yield all services when MX records resolve to configured exchange with multiple locations per service
+    
     
     it('should yield error when service is not available', function(done) {
       var resolve = sinon.stub().yields(null, [
@@ -152,45 +180,6 @@ describe('fingro-mx', function() {
         done();
       });
     }); // should yield error when service is not available
-    
-    describe('resolving to custom exchange to service map, using array of strings', function() {
-      var resolve = sinon.stub().yields(null, [
-        { exchange: 'mail.example.com', priority: 1 }
-      ]);
-      
-      
-      var services;
-      before(function(done) {
-        var exchanges = {
-          'mail.example.com': { 'oauth2-authorize': [ 'https://www.example.com/oauth2/08/authorize', 'https://www.example.com/oauth2/00/authorize' ] }
-        }
-        
-        
-        var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
-        
-        resolver.resolveServices('acct:alice@example.com', function(err, s) {
-          if (err) { return done(err); }
-          services = s;
-          done();
-        })
-      });
-      
-      it('should call dns.resolve', function() {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'example.com', 'MX'
-        );
-      });
-      
-      it('should yeild services', function() {
-        expect(services).to.be.an('object');
-        expect(Object.keys(services)).to.have.length(1);
-        expect(services['oauth2-authorize']).to.deep.equal([
-          { location: 'https://www.example.com/oauth2/08/authorize' },
-          { location: 'https://www.example.com/oauth2/00/authorize' }
-        ]);
-      });
-    });
     
     describe('resolving to custom exchange to service map, where an unknown higher priority exchange has been added', function() {
       var resolve = sinon.stub().yields(null, [
