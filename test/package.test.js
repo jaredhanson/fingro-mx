@@ -53,7 +53,7 @@ describe('fingro-mx', function() {
   
   describe('resolveServices', function() {
     
-    it('should yield service when MX records resolve to google', function(done) {
+    it('should yield service when MX records resolve to google by default', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -75,9 +75,9 @@ describe('fingro-mx', function() {
         expect(services[0]).to.deep.equal({ location: 'https://accounts.google.com/o/oauth2/v2/auth' });
         done();
       });
-    }); // should yield service when MX records resolve to google
+    }); // should yield service when MX records resolve to google by default
     
-    it('should yield all services when MX records resolve to google', function(done) {
+    it('should yield all services when MX records resolve to google by default', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -107,7 +107,32 @@ describe('fingro-mx', function() {
         ]);
         done();
       });
-    }); // should yield all services when MX records resolve to google
+    }); // should yield all services when MX records resolve to google by default
+    
+    it('should yield all services when MX records resolve to configured exchange', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'smtp.example.com', priority: 1 }
+      ]);
+      
+      var exchanges = {
+        'smtp.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
+      };
+      var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
+      resolver.resolveServices('acct:alice@example.com', function(err, services) {
+        if (err) { return done(err); }
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'example.com', 'MX'
+        );
+        expect(services).to.be.an('object');
+        expect(Object.keys(services)).to.have.length(1);
+        expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
+          { location: 'https://id.example.com' }
+        ]);
+        done();
+      });
+    }); // should yield all services when MX records resolve to configured exchange
     
     it('should yield error when service is not available', function(done) {
       var resolve = sinon.stub().yields(null, [
@@ -127,32 +152,6 @@ describe('fingro-mx', function() {
         done();
       });
     }); // should yield error when service is not available
-    
-    it('resolving to custom exchange to service map, using string', function(done) {
-      var resolve = sinon.stub().yields(null, [
-        { exchange: 'mail.example.com', priority: 1 }
-      ]);
-      
-      
-      var exchanges = {
-        'mail.example.com': { 'http://openid.net/specs/connect/1.0/issuer': 'https://id.example.com' }
-      }
-      var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
-      resolver.resolveServices('acct:alice@example.com', function(err, services) {
-        if (err) { return done(err); }
-        
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'example.com', 'MX'
-        );
-        expect(services).to.be.an('object');
-        expect(Object.keys(services)).to.have.length(1);
-        expect(services['http://openid.net/specs/connect/1.0/issuer']).to.deep.equal([
-          { location: 'https://id.example.com' }
-        ]);
-        done();
-      });
-    });
     
     describe('resolving to custom exchange to service map, using array of strings', function() {
       var resolve = sinon.stub().yields(null, [
