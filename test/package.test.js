@@ -285,7 +285,7 @@ describe('fingro-mx', function() {
           'unknown.com', 'MX'
         );
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('Unknown exchange: unknown.com');
+        expect(err.message).to.equal('Unknown mail exchange: unknown.com');
         expect(err.code).to.equal('EPROTONOSUPPORT');
         expect(services).to.be.undefined;
         done();
