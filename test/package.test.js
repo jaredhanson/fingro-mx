@@ -160,6 +160,32 @@ describe('fingro-mx', function() {
       });
     }); // should yield all services when MX records resolve to configured exchange with multiple locations per service
     
+    it('should yield all services when MX records resolve to configured exchange with multiple locations with priority per service', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'smtp.example.com', priority: 1 }
+      ]);
+      
+      var exchanges = {
+        'smtp.example.com': { 'oauth2-authorize': [ { location: 'https://www.example.com/alt1/oauth2/authorize', priority: 1 }, { location: 'https://www.example.com/alt2/oauth2/authorize', priority: 2 } ] }
+      };
+      var resolver = $require('..', { dns: { resolve: resolve } })(exchanges);
+      resolver.resolveServices('acct:alice@example.com', function(err, services) {
+        if (err) { return done(err); }
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'example.com', 'MX'
+        );
+        expect(services).to.be.an('object');
+        expect(Object.keys(services)).to.have.length(1);
+        expect(services['oauth2-authorize']).to.deep.equal([
+          { location: 'https://www.example.com/alt1/oauth2/authorize', priority: 1 },
+          { location: 'https://www.example.com/alt2/oauth2/authorize', priority: 2 }
+        ]);
+        done();
+      });
+    }); // should yield all services when MX records resolve to configured exchange with multiple locations per service
+    
     it('should yield all services when MX records resolve to configured exchange where an unknown host with higher priority has been configured', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'smtp.example.com', priority: 10 },
