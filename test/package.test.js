@@ -76,6 +76,25 @@ describe('fingro-mx', function() {
       });
     }); // should yield record with all services when called without type argument
     
+    it('should yield error when service is not available', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'aspmx.l.google.com', priority: 1 },
+        { exchange: 'aspmx2.googlemail.com', priority: 10 },
+        { exchange: 'aspmx3.googlemail.com', priority: 10 },
+        { exchange: 'alt1.aspmx.l.google.com', priority: 5 },
+        { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
+      ]);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolve('acct:jared@auth0.com', 'foo-bar', function(err, services) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Service not found: foo-bar');
+        expect(err.code).to.equal('ENODATA');
+        expect(services).to.be.undefined;
+        done();
+      });
+    }); // should yield error when service is not available
+    
   }); // resolve
   
   describe('resolveServices', function() {
