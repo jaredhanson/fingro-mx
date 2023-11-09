@@ -206,28 +206,6 @@ describe('fingro-mx', function() {
       });
     }); // should yield error when service is not available
     
-    it('should yield error when domain name not found', function(done) {
-      var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
-      ierr.code = 'ENOTFOUND';
-      ierr.errno = 'ENOTFOUND';
-      ierr.syscall = 'queryMx';
-      ierr.hostname = 'asdfasdfasdfasdf33433.com';
-      var resolve = sinon.stub().yields(ierr);
-      
-      var resolver = $require('..', { dns: { resolve: resolve } })();
-      resolver.resolveServices('acct:foo@asdfasdfasdfasdf33433.com', function(err, services) {
-        expect(resolve).to.have.been.calledOnce;
-        expect(resolve).to.have.been.calledWith(
-          'asdfasdfasdfasdf33433.com', 'MX'
-        );
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
-        expect(err.code).to.equal('ENOTFOUND');
-        expect(services).to.be.undefined;
-        done();
-      });
-    }); // should yield error when domain name not found
-    
     it('should yield error when MX record not found', function(done) {
       var ierr = new Error('queryMx ENODATA example.com');
       ierr.code = 'ENODATA';
@@ -249,6 +227,28 @@ describe('fingro-mx', function() {
         done();
       });
     }); // should yield error when MX record not found
+    
+    it('should yield error when domain name not found', function(done) {
+      var ierr = new Error('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
+      ierr.code = 'ENOTFOUND';
+      ierr.errno = 'ENOTFOUND';
+      ierr.syscall = 'queryMx';
+      ierr.hostname = 'asdfasdfasdfasdf33433.com';
+      var resolve = sinon.stub().yields(ierr);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolveServices('acct:foo@asdfasdfasdfasdf33433.com', function(err, services) {
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'asdfasdfasdfasdf33433.com', 'MX'
+        );
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('queryMx ENOTFOUND asdfasdfasdfasdf33433.com');
+        expect(err.code).to.equal('ENOTFOUND');
+        expect(services).to.be.undefined;
+        done();
+      });
+    }); // should yield error when domain name not found
     
     it('should yield error when exchange is unknown', function(done) {
       var resolve = sinon.stub().yields(null, [
