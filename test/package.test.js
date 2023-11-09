@@ -14,7 +14,7 @@ describe('fingro-mx', function() {
   
   describe('resolve', function() {
     
-    it('should yield record when called without type argument', function(done) {
+    it('should yield record with all services when called without type argument', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
         { exchange: 'aspmx2.googlemail.com', priority: 10 },
@@ -47,7 +47,7 @@ describe('fingro-mx', function() {
         });
         done();
       });
-    });
+    }); // should yield record with all services when called without type argument
     
   }); // resolve
   
