@@ -1,6 +1,6 @@
 {
   "name": "fingro-mx",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "MX record-based entity information discovery.",
   "keywords": [
     "findidp"
@@ -25,9 +25,7 @@
     }
   ],
   "main": "./lib",
-  "dependencies": {
-    
-  },
+  "dependencies": {},
   "devDependencies": {
     "make-node": "^0.3.0",
     "mocha": "^2.0.0",
