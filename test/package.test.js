@@ -97,6 +97,36 @@ describe('fingro-mx', function() {
     
   }); // resolve
   
+  describe('resolveAliases', function() {
+    
+    it('should yield not implemented error', function(done) {
+      var resolver = factory();
+      resolver.resolveAliases('acct:jared@auth0.com', function(err, aliases) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Unable to resolve aliases using DNS MX records');
+        expect(err.code).to.equal('ENOTIMP');
+        expect(aliases).to.be.undefined;
+        done();
+      });
+    }); // should yield not implemented error
+    
+  }); // resolveAliases
+  
+  describe('resolveAttributes', function() {
+    
+    it('should yield not implemented error', function(done) {
+      var resolver = factory();
+      resolver.resolveAttributes('acct:jared@auth0.com', function(err, aliases) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Unable to resolve attributes using DNS MX records');
+        expect(err.code).to.equal('ENOTIMP');
+        expect(aliases).to.be.undefined;
+        done();
+      });
+    }); // should yield not implemented error
+    
+  }); // resolveAttributes
+  
   describe('resolveServices', function() {
     
     it('should yield service when MX records resolve to google by default', function(done) {
