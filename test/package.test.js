@@ -14,6 +14,33 @@ describe('fingro-mx', function() {
   
   describe('resolve', function() {
     
+    it('should yield record with service', function(done) {
+      var resolve = sinon.stub().yields(null, [
+        { exchange: 'aspmx.l.google.com', priority: 1 },
+        { exchange: 'aspmx2.googlemail.com', priority: 10 },
+        { exchange: 'aspmx3.googlemail.com', priority: 10 },
+        { exchange: 'alt1.aspmx.l.google.com', priority: 5 },
+        { exchange: 'alt2.aspmx.l.google.com', priority: 5 }
+      ]);
+      
+      var resolver = $require('..', { dns: { resolve: resolve } })();
+      resolver.resolve('acct:jared@auth0.com', 'oauth2-authorize', function(err, record) {
+        if (err) { return done(err); }
+        
+        expect(resolve).to.have.been.calledOnce;
+        expect(resolve).to.have.been.calledWith(
+          'auth0.com', 'MX'
+        );
+        expect(record).to.be.an('object');
+        expect(record).to.deep.equal({
+          services: [
+            { location: 'https://accounts.google.com/o/oauth2/v2/auth' }
+          ]
+        });
+        done();
+      });
+    });
+    
     it('should yield record with all services when called without type argument', function(done) {
       var resolve = sinon.stub().yields(null, [
         { exchange: 'aspmx.l.google.com', priority: 1 },
